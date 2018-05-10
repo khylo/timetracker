@@ -26,6 +26,7 @@ public class Timesheet {
 	private String name;
 	private String client;
 	private String agent;
+	private String manager;
 	private BigDecimal days;
 	private BigDecimal onCall;
 	private BigDecimal overtime;
