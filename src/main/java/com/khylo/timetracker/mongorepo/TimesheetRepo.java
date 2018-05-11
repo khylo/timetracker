@@ -10,9 +10,11 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import com.khylo.timetracker.model.Timesheet;
 
 @RepositoryRestResource
-public interface TimesheetRepo  extends CrudRepository<Timesheet, String>{
+public interface TimesheetRepo  extends CrudRepository<Timesheet, String>, TimesheetCustomRepo{
 
-	public Optional<Timesheet> findByName(@Param("name")String name);
-	public Optional<Timesheet> findByClient(@Param("name")String name);
-	public Optional<Timesheet> findByYearAndMonth(@Param("y")Integer year, @Param("m") Integer month);
+	public List<Timesheet> findByName(@Param("n")String name);
+	public List<Timesheet> findByClient(@Param("c")String name);
+	public List<Timesheet> findByYearAndMonth(@Param("y")Integer year, @Param("m") Integer month);
+	public List<Timesheet> findByNameAndYearAndMonth(@Param("n")String name, @Param("y")Integer year, @Param("m") Integer month);
+	public List<Timesheet> findByYearAndMonthAndState(@Param("n")String name, @Param("y")Integer year, @Param("m") Integer month, @Param("s") String state);
 }
