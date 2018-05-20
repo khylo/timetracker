@@ -6,7 +6,7 @@ import com.khylo.timetracker.model.Timesheet;
 
 public interface TimesheetCustomRepo {
 	
-	public List<Timesheet> getUnapprovedDueTimesheets();
+	public List<Timesheet> getUnapprovedDueTimesheetsNow();
 	public List<Timesheet> getUnapprovedDueTimesheets(int year, int month);
 
 }

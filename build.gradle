@@ -1,0 +1,54 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.2.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '1.14'
+    id 'java'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+ext{
+	log4j2Version= '2.11.0'
+	javaVersion='9'
+}
+group = 'com.khylo'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = "${javaVersion}"
+
+repositories {
+	mavenCentral()
+	maven { url "https://jitpack.io" }
+}
+
+lombok { // optional: values below are the defaults
+    version = "1.16.20"
+    sha256 = "c5178b18caaa1a15e17b99ba5e4023d2de2ebc18b58cde0f5a04ca4b31c10e6d"
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	compile('org.springframework.boot:spring-boot-starter-data-rest')
+	compile('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
+	compile('org.springframework.boot:spring-boot-starter-webflux')
+	//compile('org.springframework.cloud:spring-cloud-starter')
+	//compile('org.springframework.cloud:spring-cloud-starter-config')
+	compile("org.apache.logging.log4j:log4j-api:${log4j2Version}")
+	compile("org.apache.logging.log4j:log4j-core:${log4j2Version}")
+	compile('com.github.khylo:common:master-SNAPSHOT')
+
+	//Test 
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('io.projectreactor:reactor-test')
+}

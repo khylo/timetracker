@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.khylo.timetracker.StaticData;
+import com.khylo.common.StaticData;
 import com.khylo.timetracker.mongorepo.StateRepo;
 
 import lombok.AllArgsConstructor;

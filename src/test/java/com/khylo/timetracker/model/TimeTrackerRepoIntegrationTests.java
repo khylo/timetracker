@@ -1,9 +1,19 @@
 package com.khylo.timetracker.model;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,19 +30,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.khylo.timetracker.mongorepo.TimesheetRepo;
-
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -57,26 +54,42 @@ public class TimeTrackerRepoIntegrationTests {
     private BigDecimal bd(int b) {
     	return new BigDecimal(b);
     }
+    
+    @SuppressWarnings("unused")
+    private List<TotalDays> td(String days){
+    	return List.of(new TotalDays(bd(days), WorkType.Day));
+    }
+    @SuppressWarnings("unused")
+    private List<TotalDays> td(String days, String onCall){
+    	return List.of(	new TotalDays(bd(days), WorkType.Day), 
+    					new TotalDays(bd(onCall), WorkType.OnCall));
+    }
+    @SuppressWarnings("unused")
+	private List<TotalDays> td(String days, String onCall, String overtime){
+    	return List.of(	new TotalDays(bd(days), WorkType.Day), 
+				new TotalDays(bd(onCall), WorkType.OnCall),
+				new TotalDays(bd(overtime), WorkType.Overtime));
+    }
 
 
-    @BeforeClass
+    @Before
     public void setup() {
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
 		timesheetRepo.deleteAll();
-		Timesheet li = Timesheet.builder().name("Keith").manager("Padraig").agent("eFrontiers").year(2018).month(4).days(bd(20)).onCall(bd(4)).build();
+		Timesheet li = Timesheet.builder().name("Keith").manager("Padraig").agent("eFrontiers").year(2018).month(4).totalDays(td("20","4")).build();
 		timesheetRepo.save(li);
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(4).days(bd(20)).onCall(bd(4)).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(3).days(bd("20.5")).onCall(bd(8)).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(2).days(bd(20)).onCall(bd(4)).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(1).days(bd(19)).onCall(bd(4)).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2017).month(12).days(bd(19)).onCall(bd(8)).build());
-		timesheetRepo.save(Timesheet.builder().name("Test").manager("Mgr").client("client").agent("Agent").year(2016).month(4).days(bd(20)).overtime(bd("4.5")).onCall(bd(4)).build());
-		timesheetRepo.save(Timesheet.builder().name("Test2").manager("Mgr").client("client").agent("Agent").year(2016).month(4).days(bd(5)).overtime(bd(".5")).onCall(bd(4)).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(4).totalDays(td("20","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(3).totalDays(td("20.5","8")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(2).totalDays(td("20","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(1).totalDays(td("19","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2017).month(12).totalDays(td("19","8")).build());
+		timesheetRepo.save(Timesheet.builder().name("Test").manager("Mgr").client("client").agent("Agent").year(2016).month(4).totalDays(td("20","4.5","14")).build());
+		timesheetRepo.save(Timesheet.builder().name("Test2").manager("Mgr").client("client").agent("Agent").year(2016).month(4).totalDays(td("5","30","4")).build());
     }
     
-    @AfterClass
-    public void teardown() {
+    @After
+    public  void teardown() {
     	timesheetRepo.deleteAll();
     }
     
@@ -129,17 +142,9 @@ public class TimeTrackerRepoIntegrationTests {
 
     @Test
     public void testGetAll() throws Exception {
-    	ResultActions res = mvc.perform(get("/timesheets").accept(MediaType.APPLICATION_JSON));
-        res.andExpect(status().isOk())
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItem("EBS")))
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItem("EFS")))
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItem("Glacier")))
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItem("S3")))
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItem("CosmosDB")))
-           .andExpect(jsonPath("$._embedded.timesheets[*].name", hasItems("EBS", "EFS", "S3", "Glacier", "Citus", "CosmosDB")));
-        
+    	ResultActions res = null;
         // Sorted Order by param?
-        res = mvc.perform(get("/terms").param("sort","y,dsc").param("sort","m,dsc").accept(MediaType.APPLICATION_JSON));
+        res = mvc.perform(get("/timesheets").param("sort","y,dsc").param("sort","m,dsc").accept(MediaType.APPLICATION_JSON));
         res.andExpect(status().isOk())
         	.andExpect(jsonPath("$._embedded.timesheets[0].days", is(bd("20"))))
         	.andExpect(jsonPath("$._embedded.timesheets[1].days", is(bd("20"))))	
@@ -149,23 +154,6 @@ public class TimeTrackerRepoIntegrationTests {
 		   .andExpect(jsonPath("$._embedded.timesheets[5].days", is(bd("19"))))
 		   .andExpect(jsonPath("$._embedded.timesheets[6].name", is("Test")))
 		   .andExpect(jsonPath("$._embedded.timesheets[7].name", is("Test2")));
-
-    }
-    
-    @Test
-    public void testSearchByLabels() throws Exception {
-    	List<Map<String, String>> testDataTable = List.of(Map.of("name", "Test", "ans","1"),
-    														Map.of("name", "Keith", "ans","6"));
-    	for(Map<String, String> testData: testDataTable) {
-    		String name = testData.get("name");
-    		Integer ans = Integer.parseInt(testData.get("ans"));
-    		String[] vals = testData.get("vals").split(",");
-        	ResultActions res = mvc.perform(get("/terms/search/findByName").param("name", name).accept(MediaType.APPLICATION_JSON));
-        	res.andExpect(status().isOk())
-        	.andExpect(jsonPath("$._embedded.terms", hasSize(ans)))
-        	.andExpect(jsonPath("$._embedded.terms[*].name", hasItems(vals)));
-    	}
-        
 
     }
 }

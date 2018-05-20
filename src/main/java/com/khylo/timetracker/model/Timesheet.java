@@ -14,6 +14,7 @@ import lombok.ToString;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Data @ToString(exclude="id")
 
@@ -22,34 +23,39 @@ import java.util.List;
 public class Timesheet {
 	@Id
     private String id;
+	
+	private UserStaticData user; // should user take over from name client agent manager
 
 	private String name;
 	private String client;
 	private String agent;
 	private String manager;
-	private BigDecimal days;
-	private BigDecimal onCall;
-	private BigDecimal overtime;
+
 	private int year;
 	private int month;
+	private List<WorkedDay> days;
+	private List<TotalDays> totalDays;
 	@CreatedDate
 	private Date createdDate;
 	private State state;
-
-	private List<WorkedDay> workedDays;
-	private List<WorkedDay> onCallDays;
-	private List<WorkedDay> overtimeDays;
+	//Optional Subset of Global WorkType, specifying the workTypes for this timesheet
+	private List<WorkType> types;
 	
-	class WorkedDay{
-		private int dayOfMonth;
-		private BigDecimal worked;
-	}
+	private List<TotalDays> td(BigDecimal days, BigDecimal onCall, BigDecimal overtime){
+    	return List.of(	new TotalDays(days, WorkType.Day), 
+						new TotalDays(onCall, WorkType.OnCall),
+						new TotalDays(overtime, WorkType.Overtime));
+    }
 	
-	enum State{
-		inProgress,
-		submittedForApproval,
-		approved,
-		archived
+	public Timesheet calculate() {
+		
+		Predicate<WorkedDay> day = wd -> wd.getType()==WorkType.Day; 
+		BigDecimal numDays = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal onCall = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal overtime = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
+		
+		this.setTotalDays(td(numDays, onCall, overtime));
+		return this;
 	}
 	
 

@@ -16,7 +16,7 @@ public class TimesheetCustomRepoImpl implements TimesheetCustomRepo {
 	MongoTemplate mongoTemplate;
 	
 	@Override
-	public List<Timesheet> getUnapprovedDueTimesheets() {
+	public List<Timesheet> getUnapprovedDueTimesheetsNow() {
 		LocalDateTime now = LocalDateTime.now();
 		return getUnapprovedDueTimesheets(now.getMonthValue(), now.getYear());
 	}
