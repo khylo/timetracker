@@ -1,6 +1,8 @@
 buildscript {
 	ext {
 		springBootVersion = '2.0.2.RELEASE'
+	log4j2Version= '2.11.0'
+	javaVersion='9'
 	}
 	repositories {
 		mavenCentral()
@@ -14,18 +16,16 @@ plugins {
     id 'java'
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-
-ext{
-	log4j2Version= '2.11.0'
-	javaVersion='9'
-}
 group = 'com.khylo'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = "${javaVersion}"
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
 
 repositories {
 	mavenCentral()

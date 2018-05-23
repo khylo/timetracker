@@ -11,9 +11,9 @@ import com.khylo.timetracker.mongorepo.WorkTypeRepo;
 import lombok.Data;
 import lombok.ToString;
 
-@Data @ToString
+@Data @ToString()
 @JsonInclude(Include.NON_NULL)
-public class WorkType implements StaticData{
+public class WorkType{
 	
 	public static final String days = "days";
 	public static final String onCall = "onCall";
@@ -26,26 +26,13 @@ public class WorkType implements StaticData{
 	public static final WorkType Overtime =   new WorkType(overtime);
 	public static final WorkType Overtime15 = new WorkType(overtime15);
 	public static final WorkType Overtime2 =  new WorkType(overtime2);
-	
-	
-	@Autowired WorkTypeRepo typeRepo;
+
 	
 	@Id
 	String name;
 	
 	public WorkType(String name) {
 		this.name=name;	
-	}
-	
-	
-	@Override
-	public void createData() {
-		typeRepo.save(new WorkType(days));
-		typeRepo.save(new WorkType(onCall));
-		typeRepo.save(new WorkType(overtime));
-		typeRepo.save(new WorkType(overtime15));
-		typeRepo.save(new WorkType(overtime2));
-		
 	}
 
 }

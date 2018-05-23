@@ -34,7 +34,7 @@ import com.khylo.timetracker.mongorepo.TimesheetRepo;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TimeTrackerRepoIntegrationTests {
+public class TimesheetRepoIntegrationTests {
     @Autowired private WebApplicationContext wac;
 
     @Autowired private ObjectMapper mapper;
@@ -77,15 +77,15 @@ public class TimeTrackerRepoIntegrationTests {
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
 		timesheetRepo.deleteAll();
-		Timesheet li = Timesheet.builder().name("Keith").manager("Padraig").agent("eFrontiers").year(2018).month(4).totalDays(td("20","4")).build();
+		Timesheet li = Timesheet.builder().name("Keith").year(2018).month(4).totalDays(td("20","4")).build();
 		timesheetRepo.save(li);
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(4).totalDays(td("20","4")).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(3).totalDays(td("20.5","8")).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(2).totalDays(td("20","4")).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2018).month(1).totalDays(td("19","4")).build());
-		timesheetRepo.save(Timesheet.builder().name("Keith").manager("Padraig").client("Fidelity").agent("eFrontiers").year(2017).month(12).totalDays(td("19","8")).build());
-		timesheetRepo.save(Timesheet.builder().name("Test").manager("Mgr").client("client").agent("Agent").year(2016).month(4).totalDays(td("20","4.5","14")).build());
-		timesheetRepo.save(Timesheet.builder().name("Test2").manager("Mgr").client("client").agent("Agent").year(2016).month(4).totalDays(td("5","30","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").year(2018).month(4).totalDays(td("20","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").year(2018).month(3).totalDays(td("20.5","8")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").year(2018).month(2).totalDays(td("20","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").year(2018).month(1).totalDays(td("19","4")).build());
+		timesheetRepo.save(Timesheet.builder().name("Keith").year(2017).month(12).totalDays(td("19","8")).build());
+		timesheetRepo.save(Timesheet.builder().name("Test").year(2016).month(4).totalDays(td("20","4.5","14")).build());
+		timesheetRepo.save(Timesheet.builder().name("Test2").year(2016).month(4).totalDays(td("5","30","4")).build());
     }
     
     @After

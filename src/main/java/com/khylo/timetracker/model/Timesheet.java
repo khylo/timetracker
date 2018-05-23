@@ -1,20 +1,19 @@
 package com.khylo.timetracker.model;
 
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Data @ToString(exclude="id")
 
@@ -23,38 +22,58 @@ import java.util.function.Predicate;
 public class Timesheet {
 	@Id
     private String id;
-	
-	private UserStaticData user; // should user take over from name client agent manager
 
 	private String name;
-	private String client;
-	private String agent;
-	private String manager;
+	private UserStaticData userData;
+	private List<User> users;
 
-	private int year;
-	private int month;
-	private List<WorkedDay> days;
+	@lombok.NonNull
+	private Integer year; // Integer so we can use noNull
+	@lombok.NonNull 
+	private Integer month;
+	@Builder.Default private List<WorkedDay> days=new ArrayList<>();
 	private List<TotalDays> totalDays;
 	@CreatedDate
 	private Date createdDate;
 	private State state;
-	//Optional Subset of Global WorkType, specifying the workTypes for this timesheet
-	private List<WorkType> types;
-	
-	private List<TotalDays> td(BigDecimal days, BigDecimal onCall, BigDecimal overtime){
-    	return List.of(	new TotalDays(days, WorkType.Day), 
-						new TotalDays(onCall, WorkType.OnCall),
-						new TotalDays(overtime, WorkType.Overtime));
-    }
+	@lombok.NonNull
+	private List<WorkType> allowedWorkTypes;
 	
 	public Timesheet calculate() {
-		
-		Predicate<WorkedDay> day = wd -> wd.getType()==WorkType.Day; 
-		BigDecimal numDays = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
-		BigDecimal onCall = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
-		BigDecimal overtime = days.stream().filter(day).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
-		
-		this.setTotalDays(td(numDays, onCall, overtime));
+		List<TotalDays> ret = new ArrayList<>();
+		for(WorkType type: allowedWorkTypes){
+			BigDecimal num = days.stream().filter(wd->wd.getType()==type).map(WorkedDay::getWorked).reduce(BigDecimal.ZERO, BigDecimal::add);
+			ret.add(new TotalDays(num,type));
+		}
+		this.setTotalDays(ret);
+		return this;
+	}
+
+	public boolean validWorkType(WorkType wt){
+		return allowedWorkTypes.contains(wt);
+	}
+
+	public Timesheet addDay(WorkedDay d){
+		if(!validWorkType(d.getType()))
+			throw new IllegalArgumentException("Invalid work day type "+d.getType()+". Supported values "+ allowedWorkTypes);
+		days.add(d);
+		return this;
+	}
+
+	private List<WorkType> getUsedWorkTypes(){
+		if(days==null || days.isEmpty())
+			return Collections.EMPTY_LIST;
+		return days.stream().map(WorkedDay::getType).distinct().collect(Collectors.toList());
+	}
+
+	public Timesheet setAllowedWorkTypes(List<WorkType> newAllowedWorkTypes){
+		if(newAllowedWorkTypes==null)
+			throw new IllegalArgumentException("Invalid WorkType list "+newAllowedWorkTypes);
+		List<WorkType> usedWorkTypes = getUsedWorkTypes();
+		boolean bad=!usedWorkTypes.stream().allMatch(wt->newAllowedWorkTypes.contains(wt));
+		if(bad)
+			throw new IllegalArgumentException("Invalid WorkType list "+newAllowedWorkTypes+" It does not contain some of the existing workTypes "+usedWorkTypes);
+		this.allowedWorkTypes=newAllowedWorkTypes;
 		return this;
 	}
 	
